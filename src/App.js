@@ -2,7 +2,7 @@ import React from 'react'
 
 const App = () => {
   return (
-    <div>vICA fRESINSYA</div>
+    <div className="w-screen h-screen flex items-center justify-center text-blue-600">Apa luuuu!!!!!</div>
   )
 }
 
