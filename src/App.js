@@ -1,13 +1,22 @@
-import React from 'react'
-import Header from './components/Header';
-
+import React from "react";
+import { Route, Routes } from "react-router-dom";
+import { Header, CreateContainer, MainContainer } from "./components";
+import { AnimatePresence } from "framer-motion";
 
 const App = () => {
   return (
-    <div className="w-screen h-auto flex flex-col">
-      <Header/>
-    </div>
-  )
-}
+    <AnimatePresence>
+      <div className="w-screen h-auto flex flex-col bg-primary">
+        <Header />
+        <main className="w-full p-8 mt-28">
+          <Routes>
+            <Route path="/*" element={<MainContainer />} />
+            <Route path="/createItem" element={<CreateContainer />} />
+          </Routes>
+        </main>
+      </div>
+    </AnimatePresence>
+  );
+};
 
 export default App;
