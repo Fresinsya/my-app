@@ -1,8 +1,12 @@
 import React from 'react'
+import Header from './components/Header';
+
 
 const App = () => {
   return (
-    <div className="w-screen h-screen flex items-center justify-center text-blue-600">Apa luuuu!!!!!</div>
+    <div className="w-screen h-auto flex flex-col">
+      <Header/>
+    </div>
   )
 }
 
