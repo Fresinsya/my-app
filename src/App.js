@@ -8,7 +8,7 @@ const App = () => {
     <AnimatePresence>
       <div className="w-screen h-auto flex flex-col bg-primary">
         <Header />
-        <main className="w-full p-8 mt-28">
+        <main className="w-full p-8 mt-8">
           <Routes>
             <Route path="/*" element={<MainContainer />} />
             <Route path="/createItem" element={<CreateContainer />} />

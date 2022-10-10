@@ -1,8 +1,11 @@
 import React from 'react'
+import Register from './Register'
 
 const MainContainer = () => {
   return (
-    <div>MainContainer</div>
+    <div>
+      <Register />
+    </div>
   )
 }
 
