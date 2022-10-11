@@ -1,6 +1,9 @@
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
-import { app, createUserDocument } from "../config/firebase.config";
+import { app, firestore } from "../config/firebase.config";
+import { actionType } from "../context/reducer";
+import { useStateValue } from "../context/StateProvider";
 
 const Register = () => {
   const auth = getAuth(app);
@@ -20,6 +23,38 @@ const Register = () => {
     });
   };
 
+  const [{ user }, dispatch] = useStateValue();
+
+  // menyimpan data user ke firestore
+  const createUserDocument = async (user, additionalData) => {
+    if (!user) return;
+  
+    const userRef = await doc(firestore, "users", user.uid);
+    const snapshot = await getDoc(userRef);
+  
+    const dataUser = {
+      email: user.email,
+      namaLengkap: additionalData.namaLengkap,
+      noTelpon: additionalData.noTelpon,
+      createdAt: new Date(),
+    };
+  
+    if (!snapshot.exists()) {
+      try {
+        await setDoc(userRef, dataUser);
+      } catch (error) {
+        console.log("error in creating user", error);
+      }
+    }
+
+    dispatch({
+      type: actionType.SET_USER,
+      user : dataUser
+    });
+  };
+
+  
+
   const handleSubmit = async (e) => {
     const { email, password, namaLengkap, noTelpon } = state;
     e.preventDefault();
@@ -33,20 +68,15 @@ const Register = () => {
     } catch (error) {
       console.log("error di handleSubmit", error);
     }
-
     setState({ email: "", password: "", namaLengkap: "", noTelpon: "" });
   };
 
   const { email, password, namaLengkap, noTelpon } = state;
 
   return (
-    <div>
+    <div className="w-auto">
       <section className="bg-gray-50 dark:bg-gray-900">
         <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-          {/* <a
-            href="#"
-            className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
-          /> */}
           <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">

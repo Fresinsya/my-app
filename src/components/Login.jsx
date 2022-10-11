@@ -1,28 +1,83 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { app, firestore } from "../config/firebase.config";
+import { doc, getDoc } from "firebase/firestore";
+import { actionType } from "../context/reducer";
+import { useStateValue } from "../context/StateProvider";
 
 const Login = () => {
+  // state untuk email dan password
+  const [state, setState] = useState({
+    email: "",
+    password: "",
+  });
+
+  // handle input email, pw
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setState({
+      ...state,
+      [e.target.name]: value,
+    });
+  };
+
+  const { email, password } = state;
+  const [{ user }, dispatch] = useStateValue();
+
+  const handleSubmit = async (e) => {
+    const auth = getAuth(app);
+
+    try {
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+
+      // mencari user (dokumen)
+      const docRef = await doc(firestore, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        dispatch({
+          type: actionType.SET_USER,
+          user: docSnap.data(),
+        });
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+      setState({ email: "", password: "" });
+    } catch (error) {
+      console.log("error : ", error.message);
+    }
+  };
+  
+
   return (
     <div>
-      <div class="mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col w-2/4">
-        <p className="my font-medium text-4xl">Login</p>
+      <div class="mx-auto bg-white shadow-md rounded px-8 pb-8 mb-4 mt-10 flex flex-col w-2/4 rounded-xl">
+        <h1 className="my font-medium text-4xl py-5">Login</h1>
         <div class="mb-4">
           <label
             class="block text-grey-darker text-sm font-bold mb-2"
-            for="username"
+            for="email"
+            name="email"
           >
-            Username
+            Email
           </label>
           <input
             class="shadow appearance-none border rounded w-full py-2 px-3 text-grey-darker"
-            id="username"
+            id="email"
             type="text"
-            placeholder="Username"
+            placeholder="email"
+            name="email"
+            onChange={handleChange}
+            value={email}
           />
         </div>
         <div class="mb-6">
           <label
             class="block text-grey-darker text-sm font-bold mb-2"
             for="password"
+            id="password"
+            name="password"
           >
             Password
           </label>
@@ -31,13 +86,17 @@ const Login = () => {
             id="password"
             type="password"
             placeholder="******************"
+            name="password"
+            onChange={handleChange}
+            value={password}
           />
           <p class="text-red text-xs italic">Silakan Masukkan password.</p>
         </div>
         <div class="flex items-center justify-between">
           <button
-            class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded"
+            class="bg-slate-700 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded"
             type="button"
+            onClick={handleSubmit}
           >
             Sign In
           </button>

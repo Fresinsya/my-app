@@ -7,15 +7,39 @@ import { Link } from "react-router-dom";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { app } from "../config/firebase.config";
 import Login from "./Login";
+import { useStateValue } from "../context/StateProvider";
+import { actionType } from "../context/reducer";
 
 const Header = () => {
   const firebaseAuth = getAuth(app);
   const provider = new GoogleAuthProvider();
-  
+
+  const [{ user }, dispatch] = useStateValue();
+
   const login = async () => {
-    const response = await signInWithPopup(firebaseAuth, provider)
-    console.log(response)
+    const {
+      user: { refreshToken, providerData },
+    } = await signInWithPopup(firebaseAuth, provider);
+    dispatch({
+      type: actionType.SET_USER,
+      user: providerData[0],
+    });
   };
+
+  // console.log(user);
+
+  // fungsi untuk mendapatkan initial email
+  const getInitials = (fullName) => {
+    const allNames = fullName.trim().split(' ');
+    const initials = allNames.reduce((acc, curr, index) => {
+      if(index === 0 || index === allNames.length - 1){
+        acc = `${acc}${curr.charAt(0).toUpperCase()}`;
+      }
+      return acc;
+    }, '');
+    return initials;
+  };
+
   return (
     <header className="fixed z-50 w-screen p-6 px-16 bg-primary">
       {/* desktop & tablet */}
@@ -49,13 +73,21 @@ const Header = () => {
           </div>
 
           <div className="relative">
-            <motion.img
-              whileTap={{ scale: 0.6 }}
-              src={Avatar}
-              alt="user profile"
-              className="w-10 min-w-[40px] h-10 min-h-[40px] drop-shadow-2xl cursor-pointer"
-              onClick={login}
-            />
+            {user ? (
+              <div class="inline-flex overflow-hidden relative justify-center items-center w-10 h-10 bg-gray-100 border border-slate-900 rounded-full dark:bg-gray-600">
+                <span class="font-medium text-gray-600 dark:text-gray-300">
+                  {getInitials(user.email)}
+                </span>
+              </div>
+            ) : (
+              <motion.img
+                whileTap={{ scale: 0.6 }}
+                src={user ? user.photoURL : Avatar}
+                alt="user profile"
+                className="w-10 min-w-[40px] h-10 min-h-[40px] drop-shadow-2xl cursor-pointer rounded-full"
+                onClick={login}
+              />
+            )}
           </div>
         </div>
       </div>

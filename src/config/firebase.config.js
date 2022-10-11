@@ -19,23 +19,3 @@ const firestore = getFirestore(app);
 const storage = getStorage(app);
 
 export { app, firestore, storage };
-
-export const createUserDocument = async (user, additionalData) => {
-  if (!user) return;
-
-  const userRef = await doc(firestore, "users", user.uid);
-  const snapshot = await getDoc(userRef);
-
-  if (!snapshot.exists()) {
-    try {
-      await setDoc(userRef, {
-        email: user.email,
-        namaLengkap: additionalData.namaLengkap,
-        noTelpon: additionalData.noTelpon,
-        createdAt: new Date(),
-      });
-    } catch (error) {
-      console.log("error in creating user", error);
-    }
-  }
-};
