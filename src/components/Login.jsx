@@ -4,13 +4,34 @@ import { app, firestore } from "../config/firebase.config";
 import { doc, getDoc } from "firebase/firestore";
 import { actionType } from "../context/reducer";
 import { useStateValue } from "../context/StateProvider";
+import Modal from "./Modal";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
+
   // state untuk email dan password
   const [state, setState] = useState({
     email: "",
     password: "",
   });
+
+  // when login success
+  const [openAlert, setOpenAlert] = useState(false);
+
+  useEffect(() => {
+    // hide notif after 3 sec
+    const time = setTimeout(() => {
+      setOpenAlert(false);
+    }, 3000);
+
+    return () => clearTimeout(time);
+  }, [openAlert]);
+
+  const handleAlert = (e) => {
+    e.currentTarget.classList.remove("hidden");
+    setOpenAlert(true);
+  };
 
   // handle input email, pw
   const handleChange = (e) => {
@@ -39,6 +60,8 @@ const Login = () => {
           type: actionType.SET_USER,
           user: docSnap.data(),
         });
+        setOpenAlert(true);
+        // navigate("/");
       } else {
         // doc.data() will be undefined in this case
         console.log("No such document!");
@@ -48,7 +71,6 @@ const Login = () => {
       console.log("error : ", error.message);
     }
   };
-  
 
   return (
     <div>
@@ -108,6 +130,7 @@ const Login = () => {
           </a>
         </div>
       </div>
+      <Modal show={openAlert} />
     </div>
   );
 };

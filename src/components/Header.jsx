@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { app } from "../config/firebase.config";
-import Login from "./Login";
 import { useStateValue } from "../context/StateProvider";
 import { actionType } from "../context/reducer";
 
