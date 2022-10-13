@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import Logo from "../img/logo.png";
 import Avatar from "../img/avatar.png";
-import { MdShoppingBasket } from "react-icons/md";
+import { MdShoppingBasket, MdAdd, MdLogout } from "react-icons/md";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
 import { app } from "../config/firebase.config";
 import { useStateValue } from "../context/StateProvider";
 import { actionType } from "../context/reducer";
@@ -15,27 +15,48 @@ const Header = () => {
 
   const [{ user }, dispatch] = useStateValue();
 
+  const [isMenu, setIsMenu] = useState(false);
+
   const login = async () => {
-    const {
-      user: { refreshToken, providerData },
-    } = await signInWithPopup(firebaseAuth, provider);
-    dispatch({
-      type: actionType.SET_USER,
-      user: providerData[0],
-    });
+    if (!user) {
+      const {
+        user: { refreshToken, providerData },
+      } = await signInWithPopup(firebaseAuth, provider);
+      dispatch({
+        type: actionType.SET_USER,
+        user: providerData[0],
+      });
+      localStorage.setItem("user", JSON.stringify(providerData[0]));
+    } else {
+      setIsMenu(!isMenu);
+    }
   };
+
+  const logOut = async () => {
+    try {
+      await signOut(firebaseAuth);
+      dispatch({
+        type: actionType.SET_USER,
+        user: null,
+      });
+      localStorage.removeItem("user")
+      console.log("berhasil logout")
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
 
   // console.log(user);
 
   // fungsi untuk mendapatkan initial email
   const getInitials = (fullName) => {
-    const allNames = fullName.trim().split(' ');
+    const allNames = fullName.trim().split(" ");
     const initials = allNames.reduce((acc, curr, index) => {
-      if(index === 0 || index === allNames.length - 1){
+      if (index === 0 || index === allNames.length - 1) {
         acc = `${acc}${curr.charAt(0).toUpperCase()}`;
       }
       return acc;
-    }, '');
+    }, "");
     return initials;
   };
 
@@ -49,7 +70,12 @@ const Header = () => {
         </Link>
 
         <div className="flex items-center gap-8">
-          <ul className="flex items-center gap-8">
+          <motion.ul
+            initial={{ opacity: 0, x: 200 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 200 }}
+            className="flex items-center gap-8"
+          >
             <li className="text-base text-textColor hover:text-headingColor duration-100 transition-all ease-in-out cursor-pointer cursor-pointer hover:text">
               Home
             </li>
@@ -62,7 +88,7 @@ const Header = () => {
             <li className="text-base text-textColor hover:text-headingColor duration-100 transition-all ease-in-out cursor-pointer cursor-pointer hover:text">
               Service
             </li>
-          </ul>
+          </motion.ul>
 
           <div className="relative flex items-center justify-center">
             <MdShoppingBasket className="text-textColor text-2xl ml-8 cursor-pointer" />
@@ -73,11 +99,32 @@ const Header = () => {
 
           <div className="relative">
             {user ? (
-              <div class="inline-flex overflow-hidden relative justify-center items-center w-10 h-10 bg-gray-100 border border-slate-900 rounded-full dark:bg-gray-600">
-                <span class="font-medium text-gray-600 dark:text-gray-300">
-                  {getInitials(user.email)}
-                </span>
-              </div>
+              <>
+                <div
+                  class="inline-flex overflow-hidden relative justify-center items-center w-10 h-10 bg-gray-100 border border-slate-900 rounded-full dark:bg-gray-600 cursor-pointer"
+                  onClick={login}
+                >
+                  <span class="font-medium text-gray-600 dark:text-gray-300">
+                    {getInitials(user.email)}
+                  </span>
+                </div>
+                {isMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.6 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.6 }}
+                    className="w-40 bg-gray-50 shadow-xl rounded-lg flex flex-col absolute top-12 right-2"
+                  >
+                    {/* <p className="px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-300 transition-all duration-100 ease-in-out text-textColor text-base">New Item <MdAdd/></p> */}
+                    <p
+                      className="px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-300 transition-all duration-100 ease-in-out text-textColor text-base"
+                      onClick={() => logOut()}
+                    >
+                      Log Out <MdLogout />
+                    </p>
+                  </motion.div>
+                )}
+              </>
             ) : (
               <motion.img
                 whileTap={{ scale: 0.6 }}

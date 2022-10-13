@@ -1,6 +1,7 @@
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { app, firestore } from "../config/firebase.config";
 import { actionType } from "../context/reducer";
 import { useStateValue } from "../context/StateProvider";
@@ -51,10 +52,12 @@ const Register = () => {
       type: actionType.SET_USER,
       user : dataUser
     });
+    localStorage.setItem("user", JSON.stringify(dataUser));
   };
 
   
 
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     const { email, password, namaLengkap, noTelpon } = state;
     e.preventDefault();
@@ -65,6 +68,8 @@ const Register = () => {
         password
       );
       await createUserDocument(user, { namaLengkap, noTelpon });
+      
+      navigate('/');
     } catch (error) {
       console.log("error di handleSubmit", error);
     }

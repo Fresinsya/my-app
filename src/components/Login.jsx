@@ -60,6 +60,7 @@ const Login = () => {
           type: actionType.SET_USER,
           user: docSnap.data(),
         });
+        localStorage.setItem("user", JSON.stringify(docSnap.data()));
         setOpenAlert(true);
         // navigate("/");
       } else {

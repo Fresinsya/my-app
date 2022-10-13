@@ -7,7 +7,7 @@ import Register from "./components/Register";
 
 const App = () => {
   return (
-    <AnimatePresence>
+    <AnimatePresence exitBeforeEnter>
       <div className="w-screen h-auto flex flex-col bg-primary mb-8">
         <Header />
         <main className="w-full p-8 mt-10 ">
